@@ -29,9 +29,15 @@
     "@fontsource-variable/inter": "^5.2.6",
     "@react-router/node": "^7.6.2",
     "@react-router/serve": "^7.6.2",
+    "@reactionary/core": "^0.0.76",
+    "@reactionary/provider-algolia": "^0.0.76",
+    "@reactionary/provider-commercetools": "^0.0.76",
+    "@stripe/react-stripe-js": "^5.4.1",
+    "@stripe/stripe-js": "^8.5.3",
     "isbot": "^5.1.28",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-icons": "^5.5.0",
     "react-router": "^7.6.2"
   },
   "devDependencies": {
