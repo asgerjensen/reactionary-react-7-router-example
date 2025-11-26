@@ -1,8 +1,32 @@
-import type { Address } from "@reactionary/core";
-import { Form, redirect } from "react-router";
-import type { ActionFunctionArgs } from "react-router";
+import type { Address, Cart } from "@reactionary/core";
+import { Form, redirect, useLoaderData, data } from "react-router";
+import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { createClient, createReqContext } from "~/utils/client";
-import { getSession } from "~/utils/sessions.server";
+import { getSession, withDefaultReponseHeaders } from "~/utils/sessions.server";
+import { CheckoutSummary } from "~/components/checkout-summary";
+
+export interface AddressLoaderData {
+  cart: Cart;
+}
+
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+  const session = await getSession(request.headers.get("Cookie"));
+  const reqCtx = await createReqContext(request, session);
+  const client = await createClient(reqCtx);
+
+  try {
+    const cartId = await client.cart.getActiveCartId();
+    const cart = await client.cart.getById({ cart: cartId });
+
+    return data(
+      { cart },
+      await withDefaultReponseHeaders(session, reqCtx, {})
+    );
+  } catch (error) {
+    console.error("Error loading cart:", error);
+    throw error;
+  }
+};
 
 export const action = async ({ params, request }: ActionFunctionArgs) => {
   const checkoutId = params.checkoutId;
@@ -40,11 +64,14 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
 };
 
 export default function AddressRoute() {
+  const { cart } = useLoaderData<AddressLoaderData>();
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">Shipping Address</h1>
 
-      <div className="max-w-2xl">
+      <div className="grid lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2">
         <Form method="post" className="bg-white border border-gray-200 rounded-lg p-6">
           <div className="space-y-6">
             {/* Name Fields */}
@@ -185,6 +212,19 @@ export default function AddressRoute() {
             </div>
           </div>
         </Form>
+        </div>
+
+        {/* Checkout Summary */}
+        <div className="lg:col-span-1">
+          <CheckoutSummary
+            itemCount={cart.items.length}
+            subtotal={cart.price.totalProductPrice}
+            shipping={cart.price.totalShipping}
+            tax={cart.price.totalTax}
+            discount={cart.price.totalDiscount}
+            total={cart.price.grandTotal}
+          />
+        </div>
       </div>
     </div>
   );

@@ -1,12 +1,14 @@
 import { Form, redirect, useLoaderData, data } from "react-router";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
-import type { PaymentMethod } from "@reactionary/core";
+import type { PaymentMethod, Checkout } from "@reactionary/core";
 import { useState } from "react";
 import { createClient, createReqContext } from "~/utils/client";
 import { getSession, withDefaultReponseHeaders } from "~/utils/sessions.server";
+import { CheckoutSummary } from "~/components/checkout-summary";
 
 export interface PaymentLoaderData {
   paymentMethods: Array<PaymentMethod>;
+  checkout: Checkout;
 }
 
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
@@ -16,20 +18,19 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 
   try {
     const checkoutId = params.checkoutId;
+    const checkout = await client.checkout.getById({
+      identifier: { key: checkoutId || "" },
+    });
     const paymentMethods = await client.checkout.getAvailablePaymentMethods({
       checkout: { key: checkoutId || "" },
     });
-
     return data(
-      { paymentMethods },
+      { paymentMethods, checkout },
       await withDefaultReponseHeaders(session, reqCtx, {})
     );
   } catch (error) {
     console.error("Error loading payment methods:", error);
-    return data(
-      { paymentMethods: [] },
-      await withDefaultReponseHeaders(session, reqCtx, {})
-    );
+    throw error;
   }
 };
 
@@ -79,14 +80,15 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
 };
 
 export default function PaymentRoute() {
-  const { paymentMethods } = useLoaderData<PaymentLoaderData>();
+  const { paymentMethods, checkout } = useLoaderData<PaymentLoaderData>();
   const [selectedMethod, setSelectedMethod] = useState<string>("");
 
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="mb-8 text-3xl font-bold">Payment Method</h1>
 
-      <div className="max-w-2xl">
+      <div className="grid lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2">
         <Form method="post" className="space-y-6">
           {/* Payment Methods */}
           <div className="rounded-lg border border-gray-200 bg-white p-6">
@@ -143,6 +145,19 @@ export default function PaymentRoute() {
             </button>
           </div>
         </Form>
+        </div>
+
+        {/* Checkout Summary */}
+        <div className="lg:col-span-1">
+          <CheckoutSummary
+            itemCount={checkout.items.length}
+            subtotal={checkout.price.totalProductPrice}
+            shipping={checkout.price.totalShipping}
+            tax={checkout.price.totalTax}
+            discount={checkout.price.totalDiscount}
+            total={checkout.price.grandTotal}
+          />
+        </div>
       </div>
     </div>
   );

@@ -9,9 +9,11 @@ import type {
 import { useState } from "react";
 import { createClient, createReqContext } from "~/utils/client";
 import { getSession, withDefaultReponseHeaders } from "~/utils/sessions.server";
+import { CheckoutSummary } from "~/components/checkout-summary";
 
 export interface ShippingLoaderData {
   shippingMethods: Array<ShippingMethod>;
+  checkout: Checkout;
 }
 
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
@@ -21,20 +23,20 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 
   try {
     const checkoutId = params.checkoutId;
+    const checkout = await client.checkout.getById({
+      identifier: { key: checkoutId || "" },
+    });
     const shippingMethods = await client.checkout.getAvailableShippingMethods({
       checkout: { key: checkoutId || "" },
     });
 
     return data(
-      { shippingMethods },
+      { shippingMethods, checkout },
       await withDefaultReponseHeaders(session, reqCtx, {}),
     );
   } catch (error) {
     console.error("Error loading checkout:", error);
-    return data(
-      { checkout: null },
-      await withDefaultReponseHeaders(session, reqCtx, {}),
-    );
+    throw error;
   }
 };
 
@@ -84,7 +86,7 @@ export const action = async ({ params, request }: ActionFunctionArgs) => {
 };
 
 export default function ShippingRoute() {
-  const { shippingMethods } = useLoaderData<ShippingLoaderData>();
+  const { shippingMethods, checkout } = useLoaderData<ShippingLoaderData>();
   const [selectedMethod, setSelectedMethod] = useState<string>("");
 
   const formatPrice = (price: MonetaryAmount) => {
@@ -98,7 +100,8 @@ export default function ShippingRoute() {
     <div className="container mx-auto px-4 py-8">
       <h1 className="mb-8 text-3xl font-bold">Shipping Method</h1>
 
-      <div className="max-w-2xl">
+      <div className="grid lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2">
         <Form method="post" className="space-y-6">
           {/* Shipping Methods */}
           <div className="rounded-lg border border-gray-200 bg-white p-6">
@@ -199,6 +202,19 @@ export default function ShippingRoute() {
             </button>
           </div>
         </Form>
+        </div>
+
+        {/* Checkout Summary */}
+        <div className="lg:col-span-1">
+          <CheckoutSummary
+            itemCount={checkout.items.length}
+            subtotal={checkout.price.totalProductPrice}
+            shipping={checkout.price.totalShipping}
+            tax={checkout.price.totalTax}
+            discount={checkout.price.totalDiscount}
+            total={checkout.price.grandTotal}
+          />
+        </div>
       </div>
     </div>
   );

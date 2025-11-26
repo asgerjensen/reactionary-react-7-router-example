@@ -22,6 +22,26 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
     });
 
     if (!checkout) {
+        throw new Response("Checkout Not Found", { status: 404 });
+    }
+    console.log("Checkout loaded in success route:", checkout); 
+    // Optionally delete the original cart if needed
+    if (checkout.originalCartReference) {
+        console.log('Deleting original cart:', checkout.originalCartReference);
+        if (checkout.identifier.key !== checkout.originalCartReference.key) {
+                try {
+                    const cart = await client.cart.getById({ cart: checkout.originalCartReference });
+                    console.log('Original cart found:', cart);
+                    await client.cart.deleteCart({
+                        cart: cart.identifier
+                    });
+                } catch (error) {
+                    console.error("Error deleting original cart:", error);
+                    // Proceed even if cart deletion fails
+                }
+            }
+    }
+    if (!checkout) {
       throw new Response("Checkout Not Found", { status: 404 });
     }
 
