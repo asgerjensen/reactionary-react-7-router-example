@@ -1,3 +1,65 @@
+# Reactionary React-Router demo store
+
+This demo store shows some of the capabilites of @reactionary.
+
+## Features Showcased
+
+This project demonstrates the following @reactionary/core capabilities:
+
+- **Product Catalog & Search** – Browse products with search functionality and product listing pages (PLP) with pagination
+- **Product Details Page (PDP)** – View detailed product information including:
+  - Image galleries with thumbnail navigation
+  - Variant selection
+  - Real-time stock indicators
+  - Product attributes and specifications
+  - Dynamic pricing
+- **Shopping Cart Management** – Add products to cart, update quantities, and remove items
+- **Complete Checkout Flow** – Multi-step checkout process including:
+  - Address entry and validation
+  - Shipping method selection
+  - Payment method selection
+  - Order confirmation
+- **Stripe Payment Integration** – Process payments through Stripe with proper protocol handling and client secret management
+- **User Authentication** – Sign-in, sign-up, password recovery, and sign-out flows with session management
+- **Pricing & Inventory Management** – Real-time pricing retrieval and stock availability tracking
+- **Session Management** – Secure session handling with cookie-based authentication
+- **OpenTelemetry Integration** – Distributed tracing and observability for monitoring application performance
+- **Type-Safe API Integration** – Fully typed @reactionary/core client with TypeScript support
+
+## Tech Stack
+
+- **React Router 7** – Full-stack web framework with server-side rendering
+- **@reactionary/core** – Comprehensive e-commerce framework
+- **TypeScript** – Type safety throughout the application
+- **Tailwind CSS** – Utility-first CSS framework
+- **Stripe** – Payment processing integration
+- **OpenTelemetry** – Application monitoring and tracing
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# About the boilerplate
+
+
 <a href="https://retail.nikolailehbr.ink/">
   <img alt="ReTail website screenshot" src="./public/assets/screenshot.png">
   <h1 align="center">ReTail</h1>
@@ -71,3 +133,6 @@ pnpm start
 ```
 
 Now you'll need to pick a host to deploy it to.
+
+### Acknowledgements
+The core boilerplate came form https://retail.nikolailehbr.ink/, and the rest of the boiler plate came from Medusas remix starter example.
