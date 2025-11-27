@@ -1,18 +1,16 @@
 import { useState } from "react";
 
-import { data, Form, useLoaderData } from "react-router";
+import type { Product } from "@reactionary/core";
 import { BiShoppingBag } from "react-icons/bi";
+import { data, Form } from "react-router";
+import { StockIndicator } from "~/components/stock-indicator";
 import { createClient, createReqContext } from "~/utils/client";
 import { formatPrice } from "~/utils/prices";
-import type { Price, Product } from "@reactionary/core";
 import { getSession, withDefaultReponseHeaders } from "~/utils/sessions.server";
-import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
+import type { Route } from "./+types/details";
 
-export interface ProductLoaderData {
-  product: Product;
-  price: Price | undefined;
-}
-export const loader = async ({ params, request }: LoaderFunctionArgs) => {
+
+export const loader = async ({ params, request }: Route.LoaderArgs) => {
 
   const session = await getSession(
     request.headers.get("Cookie")
@@ -22,17 +20,23 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
   const product: Product | null = await client.product.getBySlug({ slug: params.slug || '' });
 
   if (product) {
+    console.log('Product found in loader:', product);
+    const inventory = await client.inventory.getBySKU({
+      fulfilmentCenter: {key: 'OnlineFfmChannel'},
+      variant: product.mainVariant.identifier
+    });
+
     const { price }  = await client.price.getCustomerPrice({
       variant: product.mainVariant.identifier
     });
-    return data({ product, price }, await withDefaultReponseHeaders(session, reqCtx, {}) );
+    return data({ product, price, inventory }, await withDefaultReponseHeaders(session, reqCtx, {}) );
   }
   throw new Response("Product Not Found", { status: 404 });
 };
 
 
 // handle cart updates...
-export const action = async ({ request }: ActionFunctionArgs) => {
+export const action = async ({ request }: Route.ActionArgs) => {
   const session = await getSession(request.headers.get("Cookie"));
   const reqCtx = await createReqContext(request, session);
   const client = await createClient(reqCtx);
@@ -61,10 +65,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
 };
 
-export default function ProductRoute() {
-  const data: ProductLoaderData = useLoaderData();
-  const product = data.product;
-  const price = data.price;
+export default function ProductRoute({loaderData}: Route.ComponentProps) {
+  const { product , price, inventory }= loaderData;
   const [variant, setVariant] = useState(product.mainVariant);
   const [image, setImage] = useState(product.mainVariant.images[0]);
   const [quantity, setQuantity] = useState(1);
@@ -125,6 +127,14 @@ export default function ProductRoute() {
         <div className="flex flex-col px-16 py-4 space-y-8">
           <h1>{product.name} </h1>
           <p className="font-semibold text-teal-600">{formatPrice(price)}</p>
+          
+          {/* Stock Indicator */}
+          <StockIndicator 
+            inStock={inventory?.status === 'inStock'}
+            stockLevel={inventory?.quantity || 0}
+            lowStockThreshold={10}
+          />
+          
           <div>
             <p className="font-semibold">Select Size</p>
             <div className="grid grid-cols-3 gap-2 mt-2 md:grid-cols-2 xl:grid-cols-4">
