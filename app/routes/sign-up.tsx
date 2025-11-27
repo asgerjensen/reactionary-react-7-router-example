@@ -1,5 +1,4 @@
 import { data, Form, Link, redirect } from "react-router";
-import type { ActionFunctionArgs } from "react-router";
 import type { Route } from "./+types/sign-up";
 import { getSession, withDefaultReponseHeaders } from "~/utils/sessions.server";
 import  { createClient, createReqContext } from "~/utils/client";
@@ -8,6 +7,9 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
     const session = await getSession(
         request.headers.get("Cookie")
     );
+    if (session.has('isLoggedIn') && session.get('isLoggedIn') === true) {
+        return redirect("/" );
+    }
     if (session.has("error")) {
         const error = session.get("error");
         return data( { error }, await withDefaultReponseHeaders(session, await createReqContext(request, session), {}));
@@ -16,13 +18,12 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
 };
 
 
-export const action = async ({ request }: ActionFunctionArgs) => {
+export const action = async ({ request }: Route.ActionArgs) => {
   const formData = await request.formData();
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   const firstName = formData.get("firstName") as string;
   const lastName = formData.get("lastName") as string;
-
 
   const session = await getSession(
     request.headers.get("Cookie")
@@ -40,7 +41,10 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         firstName: firstName,
         lastName: lastName,
     });
-    console.log("Registered user:", me);
+    if (me.type === 'Registered') {
+        session.set("isLoggedIn", true);
+        session.set('userId', me.id.userId );
+    }
   } catch(err) {
     session.flash("error", "Error creating account: " + err);
     return redirect("/sign-up", await withDefaultReponseHeaders(session, reqCtx, {}));

@@ -9,6 +9,9 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
     const session = await getSession(
         request.headers.get("Cookie")
     );
+    if (session.has('isLoggedIn') && session.get('isLoggedIn') === true) {
+        return redirect("/" );
+    }
     if (session.has("error")) {
         const error = session.get("error");
         return data( { error }, await withDefaultReponseHeaders(session, await createReqContext(request, session), {}));
@@ -32,6 +35,10 @@ export const action = async ({ request }: Route.ActionArgs) => {
         username: email,
         password: password,
     });
+    if (me.type === 'Registered') {
+        session.set("isLoggedIn", true);
+        session.set('userId', me.id.userId );
+    }
     return data({ me}, await withDefaultReponseHeaders(session, reqCtx, {}));
   } catch(err) {
     session.flash("error", "Invalid email or password " + err);

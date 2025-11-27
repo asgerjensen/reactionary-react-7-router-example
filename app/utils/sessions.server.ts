@@ -3,6 +3,7 @@ import { createCookieSessionStorage, type Session } from "react-router";
 
 type SessionData = {
   userId: string;
+  isLoggedIn: boolean;
   reactionarySession: unknown;
 };
 

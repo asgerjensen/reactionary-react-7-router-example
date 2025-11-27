@@ -20,7 +20,7 @@ export const loader = async ({ params, request }: Route.LoaderArgs) => {
   const product: Product | null = await client.product.getBySlug({ slug: params.slug || '' });
   
   if (product) {
-    console.log('Product found in loader:', product);
+  
     const inventory = await client.inventory.getBySKU({
       fulfilmentCenter: {key: 'OnlineFfmChannel'},
       variant: product.mainVariant.identifier
@@ -203,7 +203,7 @@ export default function ProductRoute({loaderData}: Route.ComponentProps) {
           <h2 className="text-2xl font-semibold mb-6">Product Specifications</h2>
           <dl className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {product.sharedAttributes.map((item) => (
-              <div key={item.identifier.key} className="flex flex-col">
+            <div key={item.identifier.key} className="flex flex-col">
                 <dt className="font-semibold text-gray-700 capitalize mb-1">
                   {item.name.replace(/-/g, ' ')}
                 </dt>

@@ -16,14 +16,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const cart = await client.cart.getById({
     cart:  await client.cart.getActiveCartId()
   });
-  let isLoggedIn = false;
-
-  try {
-    const me = await client.identity.getSelf({});
-    isLoggedIn =  me.type === 'Registered';
-  } catch (error) {
-    isLoggedIn = false;
-  }
+  const isLoggedIn = session.has("isLoggedIn") && session.get("isLoggedIn") === true;
 
   return data({ cartCount: cart.items.length, isLoggedIn  }, await withDefaultReponseHeaders(session, reqCtx, {}) );
 }
