@@ -39,6 +39,7 @@ export { getSession, commitSession, destroySession };
 export async function withDefaultReponseHeaders( session: Session<SessionData,SessionFlashData>, reqCtx: RequestContext, responseInit: Partial<ResponseInit> ): Promise<ResponseInit> {
 
   session.set('reactionarySession', reqCtx.session);
+//  console.log("Request context in responseHeader:", reqCtx);
   return {
     ...responseInit,
     headers: {

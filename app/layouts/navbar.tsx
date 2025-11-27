@@ -1,13 +1,12 @@
-import { Link, NavLink, useLoaderData, useNavigate } from "react-router";
-import { BiShoppingBag } from "react-icons/bi";
+import { Link, NavLink, Form, useNavigate } from "react-router";
+import { BiShoppingBag, BiUser } from "react-icons/bi";
 
-
-
-
-export default function Navbar({ cartCount }) {
+export default function Navbar({ cartCount, isLoggedIn }) {
 
   const navigate = useNavigate();
-  let count = 0;
+  
+  // TODO: Get actual user state from session/context
+  const userName = ""; // Replace with actual user name
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -59,6 +58,27 @@ export default function Navbar({ cartCount }) {
           className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
         />
       </form>
+
+      {/* User Account */}
+      <div className="font-semibold text-gray-600 hover:text-emerald-500">
+        {isLoggedIn ? (
+          <Form method="post" action="/sign-out" className="inline">
+            <button
+              type="submit"
+              className="inline-flex items-center space-x-1 transition-colors duration-300 hover:text-emerald-500"
+            >
+              <BiUser className="text-xl" />Logged in - <span>Sign Out</span>
+            </button>
+          </Form>
+        ) : (
+          <NavLink
+            to="/sign-in"
+            className="inline-flex items-center space-x-1 transition-colors duration-300"
+          >
+            <BiUser className="text-xl" /> <span>Sign In</span>
+          </NavLink>
+        )}
+      </div>
 
       {/* Shopping Cart Indicator/Checkout Link */}
       <div className="font-semibold text-gray-600 hover:text-emerald-500">

@@ -5,6 +5,11 @@ export default [
     index("routes/index.tsx"),
 
     route('search/:term', "routes/products/plp.tsx"),
+    route('sign-in', "routes/sign-in.tsx"),
+    route('sign-up', "routes/sign-up.tsx"),
+    route('sign-out', "routes/sign-out.tsx"),
+    route('forgot-password', "routes/forgot-password.tsx"),
+    
     ...prefix("products", [
         index("./routes/products/index.tsx"),
         route(":slug", "./routes/products/details.tsx"),
