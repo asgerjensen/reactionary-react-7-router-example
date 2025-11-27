@@ -18,8 +18,8 @@ export default function ProductCard(data: ProductCardProps) {
   return (
     <section className="overflow-hidden bg-white rounded-lg shadow:md hover:shadow-lg w-80">
       <Link to={`/products/${product.slug}`}>
-        <div className="flex items-center justify-center bg-gray-100 shrink-0" >
-          <img className="object-scale-down" src={variant.image.sourceUrl} alt={variant.image.altText || product.name} />
+        <div className="flex items-center justify-center bg-gray-100 shrink-0 aspect-square" >
+          <img className="object-contain w-full h-full" src={variant.image.sourceUrl} alt={variant.image.altText || product.name} />
         </div>
         <div className="p-4">
           <h3 className="text-lg font-bold text-gray-700 hover:underline">

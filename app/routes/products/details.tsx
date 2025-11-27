@@ -105,22 +105,29 @@ export default function ProductRoute({loaderData}: Route.ComponentProps) {
     <div className="w-full">
       <div className="grid items-center md:grid-cols-2">
         <div>
-          <img
-            className="w-500 rounded-lg object-scale-down"
-            src={image.sourceUrl}
-            alt={product.name}
-          />
+          <div className="flex items-center justify-center aspect-square h-[66vh] mx-auto">
+            <img
+              className="w-full h-full rounded-lg object-contain"
+              src={image.sourceUrl}
+              alt={product.name}
+            />
+          </div>
           <div className="flex justify-center p-4 space-x-2 ">
             {product.mainVariant.images.map((imageItem) => (
-              <img
-                className={`w-16 border-2 rounded-lg ${
-                  imageItem.sourceUrl === image.sourceUrl ? "border-teal-400" : null
-                }`  }
+              <button
                 key={imageItem.sourceUrl}
-                src={imageItem.sourceUrl}
-                alt={product.name}
                 onClick={() => handleImageChange(imageItem.sourceUrl)}
-              />
+                className={`w-16 h-16 border-2 rounded-lg overflow-hidden ${
+                  imageItem.sourceUrl === image.sourceUrl ? "border-teal-400" : "border-gray-300"
+                }`}
+                type="button"
+              >
+                <img
+                  className="w-full h-full object-contain"
+                  src={imageItem.sourceUrl}
+                  alt={product.name}
+                />
+              </button>
             ))}
           </div>
         </div>
