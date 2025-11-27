@@ -3,6 +3,7 @@
 import {
   ClientBuilder,
   createInitialRequestContext,
+  MemoryCache,
   NoOpCache,
   PaymentMethodIdentifierSchema,
   PaymentMethodSchema,
