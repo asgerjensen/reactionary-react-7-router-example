@@ -39,22 +39,24 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
   const prices = (await Promise.all(pricePromises)).filter((price): price is Price => price !== null);
   return data({
     productPage: productPageResponse,
-    productPrices: prices
+    productPrices: prices,
+    cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME || undefined,
   }, await withDefaultReponseHeaders(session, reqCtx, {}) );
 };
 
 
 
-export default function ProductsIndexRoute() {
-  const data: ProductsIndexLoaderData = useLoaderData();
+export default function ProductsIndexRoute({ loaderData }: Route.ComponentProps ) {
+  const data = loaderData;
   const productPage = data.productPage;
   const productPrices = data.productPrices;
+  const cloudinaryCloudName = data.cloudinaryCloudName;
 
 
   return (
     <div className="w-full p-4 my-8">
       <h1 className="text-center">Latest Arrivals</h1>
-      <ProductGrid productPage={productPage} productPrices={productPrices} />
+      <ProductGrid productPage={productPage} productPrices={productPrices} cloudinaryCloudName={cloudinaryCloudName} />
     </div>
   );
 }
