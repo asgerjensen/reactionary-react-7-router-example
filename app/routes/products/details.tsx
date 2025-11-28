@@ -6,6 +6,7 @@ import { data, Form, useActionData } from "react-router";
 import { StockIndicator } from "~/components/stock-indicator";
 import { createClient, createReqContext } from "~/utils/client";
 import { formatPrice } from "~/utils/prices";
+import { getCloudinaryUrl } from "~/utils/cloudinary";
 import { getSession, withDefaultReponseHeaders } from "~/utils/sessions.server";
 import type { Route } from "./+types/details";
 
@@ -29,8 +30,9 @@ export const loader = async ({ params, request }: Route.LoaderArgs) => {
     const { price }  = await client.price.getCustomerPrice({
       variant: product.mainVariant.identifier
     });
-    return data({ product, price, inventory }, await withDefaultReponseHeaders(session, reqCtx, {}) );
-  }
+    const cloudinaryCloudName = process.env.CLOUDINARY_CLOUD_NAME || undefined;
+    return data({ product, price, inventory, cloudinaryCloudName }, await withDefaultReponseHeaders(session, reqCtx, {}) );
+  } 
   throw new Response("Product Not Found", { status: 404 });
 };
 
@@ -66,7 +68,7 @@ export const action = async ({ request }: Route.ActionArgs) => {
 };
 
 export default function ProductRoute({loaderData}: Route.ComponentProps) {
-  const { product , price, inventory }= loaderData;
+  const { product , price, inventory, cloudinaryCloudName }= loaderData;
   const actionData = useActionData<typeof action>();
   const [variant, setVariant] = useState(product.mainVariant);
   const [image, setImage] = useState(product.mainVariant.images[0]);
@@ -120,7 +122,13 @@ export default function ProductRoute({loaderData}: Route.ComponentProps) {
           <div className="flex items-center justify-center aspect-square h-[66vh] mx-auto">
             <img
               className="w-full h-full rounded-lg object-contain"
-              src={image.sourceUrl}
+              src={getCloudinaryUrl(image.sourceUrl, {
+                width: 800,
+                height: 800,
+                quality: 'auto',
+                format: 'auto',
+                crop: 'fill'
+              }, cloudinaryCloudName)}
               alt={product.name}
             />
           </div>
@@ -136,7 +144,13 @@ export default function ProductRoute({loaderData}: Route.ComponentProps) {
               >
                 <img
                   className="w-full h-full object-contain"
-                  src={imageItem.sourceUrl}
+                  src={getCloudinaryUrl(imageItem.sourceUrl, {
+                    width: 64,
+                    height: 64,
+                    quality: 'auto',
+                    format: 'auto',
+                    crop: 'fill'
+                  }, cloudinaryCloudName)}
                   alt={product.name}
                 />
               </button>

@@ -4,9 +4,10 @@ import ProductCard, { type ProductCardProps } from "~/components/product-card";
 export interface ProductGridProps {
   productPage: ProductSearchResult;
   productPrices: Price[];
+  cloudinaryCloudName?: string; 
 }
 
-export function ProductGrid({ productPage, productPrices }: ProductGridProps) {
+export function ProductGrid({ productPage, productPrices, cloudinaryCloudName }: ProductGridProps) {
   return (
     <div className="grid grid-cols-4 gap-6 px-4 mt-8 md:px-12 lg:px-6 xl:px-4 xl:gap-6 2xl:px-24 2xl:gap-6 justify-items-center md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 overflow-hidden">
       {productPage.items.map((product) => {
@@ -15,7 +16,8 @@ export function ProductGrid({ productPage, productPrices }: ProductGridProps) {
         )!;
         const cardData: ProductCardProps = {
           product: product,
-          price: price
+          price: price,
+          cloudinaryCloudName: cloudinaryCloudName
         };
         return <ProductCard key={product.identifier.key} {...cardData} />;
       })}

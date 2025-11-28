@@ -38,6 +38,19 @@ This project demonstrates the following @reactionary/core capabilities:
 
 
 
+## To configure
+
+Copy the `.env.template`  to `.env` and fill out the various keys and whatnots.
+
+For Cloudinary, you can just create a new empty account. If you dont set a cloudinary account name, it will just default to use the images as they are from your feed.
+
+
+## To configure @reactionary
+
+Open `client.ts` and find the `createClient` function. Here you defined what providers you want to have for the various capabilities. Currently, it is set to Algolia for search and Commercetools for ecom related stuff.
+
+You can try changing the product search to be run by Commercetools, or you can change to use Medusa instead of Commercetools for the ecom capabiltiies.
+
 
 
 

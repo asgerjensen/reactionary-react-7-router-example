@@ -62,17 +62,21 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
   return data({
     productPage: productPageResponse,
     productPrices: prices,
-    currentPage: currentPage
+    currentPage: currentPage,
+    cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME || undefined
   }, await withDefaultReponseHeaders(session, reqCtx, {}) );
 };
 
 
 
-export default function ProductsIndexRoute() {
-  const data: ProductsIndexLoaderData = useLoaderData();
+export default function ProductsIndexRoute( { loaderData }: Route.ComponentProps  ) {
+
+
+  const data = loaderData;
   const productPage = data.productPage;
   const productPrices = data.productPrices;
   const currentPage = data.currentPage;
+  const cloudinaryCloudName = data.cloudinaryCloudName;
 
   const totalPages = Math.ceil(productPage.totalCount / 12);
 
@@ -88,7 +92,7 @@ export default function ProductsIndexRoute() {
         
         {/* Main Content */}
         <div className="flex-1">
-          <ProductGrid productPage={productPage} productPrices={productPrices} />
+          <ProductGrid productPage={productPage} productPrices={productPrices} cloudinaryCloudName={cloudinaryCloudName} />
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
