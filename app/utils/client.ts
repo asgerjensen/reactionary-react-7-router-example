@@ -67,10 +67,12 @@ export function getCommercetoolsConfiguration(): CommercetoolsConfiguration {
 
 export async function createReqContext(request: Request, session: Session<SessionData, SessionData>): Promise<RequestContext> {
   const reqCtx = createInitialRequestContext();
+  reqCtx.session = JSON.parse(session.get('reactionarySession') || '{}');
+  // console.log("Session data in createReqContext:", session.get('reactionarySession'), reqCtx.session  );
   if (!session.has('reactionarySession')) {
-    session.set('reactionarySession', {});
+    session.set('reactionarySession', JSON.stringify({}));
   }
-  reqCtx.session = session.get('reactionarySession');
+  
   reqCtx.clientIp = request.headers.get('X-Forwarded-For') || request.headers.get('Remote-Addr') || '';
   reqCtx.userAgent = request.headers.get('User-Agent') || '';
   reqCtx.isBot = /bot|crawler|spider|crawling/i.test(reqCtx.userAgent || '');

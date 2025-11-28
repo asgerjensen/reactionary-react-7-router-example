@@ -4,7 +4,7 @@ import { createCookieSessionStorage, type Session } from "react-router";
 type SessionData = {
   userId: string;
   isLoggedIn: boolean;
-  reactionarySession: unknown;
+  reactionarySession: string;
 };
 
 type SessionFlashData = {
@@ -39,8 +39,8 @@ export { getSession, commitSession, destroySession };
 
 export async function withDefaultReponseHeaders( session: Session<SessionData,SessionFlashData>, reqCtx: RequestContext, responseInit: Partial<ResponseInit> ): Promise<ResponseInit> {
 
-  session.set('reactionarySession', reqCtx.session);
-//  console.log("Request context in responseHeader:", reqCtx);
+  session.set('reactionarySession', JSON.stringify(reqCtx.session));
+ // console.log("Request context in responseHeader:", reqCtx.session);
   return {
     ...responseInit,
     headers: {

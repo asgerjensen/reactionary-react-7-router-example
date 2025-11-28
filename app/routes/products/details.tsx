@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import type { Product } from "@reactionary/core";
-import { BiShoppingBag } from "react-icons/bi";
-import { data, Form } from "react-router";
+import { BiShoppingBag, BiCheckCircle } from "react-icons/bi";
+import { data, Form, useActionData } from "react-router";
 import { StockIndicator } from "~/components/stock-indicator";
 import { createClient, createReqContext } from "~/utils/client";
 import { formatPrice } from "~/utils/prices";
@@ -67,9 +67,21 @@ export const action = async ({ request }: Route.ActionArgs) => {
 
 export default function ProductRoute({loaderData}: Route.ComponentProps) {
   const { product , price, inventory }= loaderData;
+  const actionData = useActionData<typeof action>();
   const [variant, setVariant] = useState(product.mainVariant);
   const [image, setImage] = useState(product.mainVariant.images[0]);
   const [quantity, setQuantity] = useState(1);
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  useEffect(() => {
+    if (actionData?.success) {
+      setShowSuccess(true);
+      const timer = setTimeout(() => {
+        setShowSuccess(false);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [actionData]);
 
   const allVariants = [ product.mainVariant] ;
   const handleVariantChange = (index: number) => {
@@ -188,6 +200,16 @@ export default function ProductRoute({loaderData}: Route.ComponentProps) {
                 <span>Add to Cart</span>
               </button>
             </Form>
+            
+            {/* Success Animation */}
+            {showSuccess && (
+              <div className="mt-4 animate-fade-in">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-100 text-emerald-800 rounded-lg border border-emerald-300">
+                  <BiCheckCircle className="text-xl" />
+                  <span className="font-medium">Added to cart!</span>
+                </div>
+              </div>
+            )}
           </div>
           <div>
             <p className="font-semibold">Product Description</p>
