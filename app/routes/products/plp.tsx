@@ -1,8 +1,9 @@
 import { data, useLoaderData } from "react-router";
-import type { ProductSearchResult, Price } from "@reactionary/core";
+import type { ProductSearchResult, Price, ProductSearchResultFacet, FacetValueIdentifier } from "@reactionary/core";
 import { createClient, createReqContext } from "~/utils/client";
 import { ProductGrid } from "~/components/product-grid";
 import { Pagination } from "~/components/pagination";
+import { Facets } from "~/components/facets";
 import { getSession, withDefaultReponseHeaders } from "~/utils/sessions.server";
 import type { Route } from "./+types/plp";
 
@@ -22,14 +23,28 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
   const currentPage = parseInt(url.searchParams.get("page") || "1", 10);
   const pageSize = 12;
 
-  const productPageResponse = await client.productSearch.queryByTerm({
+  // Extract filters from URL query parameters
+  // Format: filter_<facetKey>=value1&filter_<facetKey>=value2
+  const facetSelections: Array<FacetValueIdentifier> = [];
+  
+  for (const [paramKey, paramValue] of url.searchParams.entries()) {
+    if (paramKey.startsWith('filter_')) {
+      const facetKey = paramKey.replace('filter_', '');
+      facetSelections.push({
+        facet: { key: facetKey },
+        key: paramValue
+      } satisfies FacetValueIdentifier);
+    }
+  }
+
+   const productPageResponse = await client.productSearch.queryByTerm({
     search: {
       term: params.term || '*',
       paginationOptions: {
         pageNumber: currentPage,
         pageSize: pageSize
       },
-      facets: [],
+      facets: [...facetSelections],
       filters: []
     }
   });
@@ -63,14 +78,25 @@ export default function ProductsIndexRoute() {
 
   return (
     <div className="w-full p-4 my-8">
-      <h1 className="text-center">Search results</h1>
-      <ProductGrid productPage={productPage} productPrices={productPrices} />
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        totalItems={productPage.totalCount}
-        itemsPerPage={12}
-      />
+      <h1 className="text-center mb-8">Search results</h1>
+      
+      <div className="flex gap-8">
+        {/* Facets Sidebar */}
+        <aside className="w-64 flex-shrink-0">
+          <Facets productPage={productPage} />
+        </aside>
+        
+        {/* Main Content */}
+        <div className="flex-1">
+          <ProductGrid productPage={productPage} productPrices={productPrices} />
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={productPage.totalCount}
+            itemsPerPage={12}
+          />
+        </div>
+      </div>
     </div>
   );
 }
