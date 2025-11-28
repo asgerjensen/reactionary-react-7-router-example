@@ -36,7 +36,7 @@ export default function Navbar({ cartCount, isLoggedIn }) {
       {/* Site Logo */}
       <div className="font-mono text-3xl font-extrabold uppercase">
         <Link to="/">
-          <img className="w-28" src="/logo.svg" alt="Medusa" />
+          <img className="w-20" src="/logo.svg" alt="Medusa" />
         </Link>
       </div>
 
