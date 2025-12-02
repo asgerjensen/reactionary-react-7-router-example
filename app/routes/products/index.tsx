@@ -15,9 +15,10 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
   );
   const reqCtx = await createReqContext(request, session);
   const client = await createClient(reqCtx);
+  
   const productPageResponse = await client.productSearch.queryByTerm({
     search: {
-      term: "*",
+      term: "new",
       paginationOptions: {
         pageNumber: 1,
         pageSize: 12

@@ -30,6 +30,7 @@ export const loader = async ({ params, request }: Route.LoaderArgs) => {
     const { price }  = await client.price.getCustomerPrice({
       variant: product.mainVariant.identifier
     });
+
     const cloudinaryCloudName = process.env.CLOUDINARY_CLOUD_NAME || undefined;
     return data({ product, price, inventory, cloudinaryCloudName }, await withDefaultReponseHeaders(session, reqCtx, {}) );
   } 
@@ -85,7 +86,7 @@ export default function ProductRoute({loaderData}: Route.ComponentProps) {
     }
   }, [actionData]);
 
-  const allVariants = [ product.mainVariant] ;
+  const allVariants = [ product.mainVariant, ...product.variants ]; ;
   const handleVariantChange = (index: number) => {
     setVariant(allVariants[index]);
     setQuantity(1);
@@ -167,11 +168,11 @@ export default function ProductRoute({loaderData}: Route.ComponentProps) {
             stockLevel={inventory?.quantity || 0}
             lowStockThreshold={10}
           />
-          
+            {allVariants.length > 1 && (
           <div>
-            <p className="font-semibold">Select Size</p>
+            <p className="font-semibold">Select Variant</p>
             <div className="grid grid-cols-3 gap-2 mt-2 md:grid-cols-2 xl:grid-cols-4">
-              { [ product.mainVariant].map((variantItem, index) => (
+              { allVariants.map((variantItem, index) => (
                 <button
                   key={variantItem.identifier.sku}
                   className={`px-2 py-1 mr-2 text-sm hover:brightness-90 ${
@@ -185,7 +186,7 @@ export default function ProductRoute({loaderData}: Route.ComponentProps) {
                 </button>
               ))}
             </div>
-          </div>
+          </div> )}
           <div>
             <p className="font-semibold">Select Quantity</p>
             <div className="flex items-center px-4 mt-2 space-x-4">

@@ -10,9 +10,13 @@ export default [
     route('sign-out', "routes/sign-out.tsx"),
     route('forgot-password', "routes/forgot-password.tsx"),
     
+    ...prefix("category", [
+        route(":slug", "routes/category/$slug.tsx"),
+    ]),
+    
     ...prefix("products", [
         index("./routes/products/index.tsx"),
-        route(":slug", "./routes/products/details.tsx"),
+        route(":slug", "./routes/products/pdp.tsx"),
     ]),
 
     ...prefix("checkout", [

@@ -39,7 +39,7 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 
     // Get client_secret from protocol data
     const clientSecretData = pendingPayment.protocolData.find(
-      (data) => data.key === "stripe_clientSecret"
+      (data) => data.key === "stripe_clientSecret" || data.key === "client_secret"
     );
 
     if (!clientSecretData) {

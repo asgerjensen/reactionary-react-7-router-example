@@ -11,6 +11,7 @@ import {
   RequestContextSchema,
 } from '@reactionary/core';
 import { type CommercetoolsConfiguration, withCommercetoolsCapabilities } from '@reactionary/provider-commercetools';
+import { type MedusaConfiguration, MedusaConfigurationSchema, withMedusaCapabilities } from '@reactionary/provider-medusa';
 import { type AlgoliaConfiguration, withAlgoliaCapabilities } from '@reactionary/provider-algolia';
 import type { Session, SessionData } from 'react-router';
 
@@ -49,19 +50,31 @@ export function getCommercetoolsConfiguration(): CommercetoolsConfiguration {
       .map((x) => x.trim())
       .filter((x) => x && x.length > 0),
 
+    facetFieldsForSearch: [ 'attributes.product-colour', 'attributes.cable-length', 'attributes.connector-gender', 'attributes.country-of-origin'],
     paymentMethods: [
       PaymentMethodSchema.parse({
         identifier: PaymentMethodIdentifierSchema.parse({
-          paymentProvider: 'stripe',
+          paymentProcessor: 'stripe',
           method: 'stripe',
           name: 'Stripe',
         }),
+        isPunchOut: true,
         description: 'Stripe payment gateway',
       }),
     ],
   };
 }
 
+
+export function getMedusaConfiguration(): MedusaConfiguration {
+  return MedusaConfigurationSchema.parse({
+        publishable_key: process.env['MEDUSA_PUBLISHABLE_KEY'] || '',
+        adminApiKey: process.env['MEDUSA_ADMIN_KEY'] || '',
+        apiUrl: process.env['MEDUSA_API_URL'] || '',
+        defaultCurrency: process.env['MEDUSA_DEFAULT_CURRENCY'] || '',
+    });
+
+}
 
 
 
@@ -84,7 +97,6 @@ export async function createReqContext(request: Request, session: Session<Sessio
 export async function createClient(reqCtx: RequestContext) {
 
 
-
   const client = new ClientBuilder(reqCtx)
     .withCapability(withAlgoliaCapabilities(
       getAlgoliaConfiguration(),
@@ -94,6 +106,20 @@ export async function createClient(reqCtx: RequestContext) {
     ))
     .withCapability(withCommercetoolsCapabilities(
       getCommercetoolsConfiguration(),
+      {
+        cart: false,
+        category: false,
+        checkout: false,
+        identity: false,
+        inventory: false,
+        order: false,
+        price: false,
+        product: false,
+        productSearch: false
+      },
+    ))
+    .withCapability(withMedusaCapabilities(
+      getMedusaConfiguration(),
       {
         cart: true,
         category: true,
@@ -108,6 +134,5 @@ export async function createClient(reqCtx: RequestContext) {
     ))
     .withCache(new NoOpCache())
     .build();
-
   return client;
 }

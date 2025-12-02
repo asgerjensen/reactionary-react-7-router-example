@@ -41,7 +41,7 @@ export function Facets({ productPage, selectedFilters = {} }: FacetsProps) {
               className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors"
             >
               <span className="font-semibold text-gray-800 capitalize">
-                {String(facet.name || facetKey).replace(/_/g, ' ')}
+                {String(facet.name || facetKey).replace(/_/g, ' ').replace('attributes.', '').replace(/-/g, ' ')}
               </span>
               {isExpanded ? (
                 <BiChevronUp className="w-5 h-5 text-gray-600" />

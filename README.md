@@ -51,6 +51,10 @@ Open `client.ts` and find the `createClient` function. Here you defined what pro
 
 You can try changing the product search to be run by Commercetools, or you can change to use Medusa instead of Commercetools for the ecom capabiltiies.
 
+### Specific about Medusa
+Due to the incomplete ESM implementation, medusas SDK still uses directory imports, even in the ESM modules they provide.
+So, if you use Medusa, you have to run `pnpm run fixMedusa` after each `pnpm install`.
+
 
 
 
