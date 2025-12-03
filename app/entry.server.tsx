@@ -6,12 +6,15 @@ import { renderToPipeableStream } from "react-dom/server";
 
 import { otelInstrumentation } from "./instrumenters/otel";
 import { requestLoggerInstrumentation } from "./instrumenters/requestlogger";
+import { MemoryCache, NoOpCache } from "@reactionary/core";
 
 const { NodeSDK } = await import('@opentelemetry/sdk-node');
 const sdk = new NodeSDK();
 sdk.start();
 
 export const unstable_instrumentations = [otelInstrumentation, requestLoggerInstrumentation];
+
+export const reactionaryCache = new NoOpCache();
 
 export default function handleRequest(
   request: Request,

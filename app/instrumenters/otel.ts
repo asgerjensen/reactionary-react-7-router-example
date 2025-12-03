@@ -1,4 +1,6 @@
-import { SpanStatusCode, trace, type Tracer } from "@opentelemetry/api";
+import { SpanStatusCode, trace,  type Tracer, type Histogram } from "@opentelemetry/api";
+import { metrics } from "@opentelemetry/api";
+
 import type { unstable_ServerInstrumentation, unstable_InstrumentationHandlerResult } from "react-router";
 
 let globalTracer: Tracer | null = null;
@@ -11,6 +13,24 @@ export function getTracer(): Tracer {
     globalTracer = trace.getTracer("reactionary-react-router-7-example", "1.0.0");
   }
   return globalTracer;
+}
+
+export interface DemoStoreMeter {
+  requestDuration: Histogram;
+}
+
+
+let globalMeter: DemoStoreMeter | null = null; 
+export function getMeter(): DemoStoreMeter {
+  if (!globalMeter) {
+    const meterInstance = metrics.getMeter("reactionary-react-router-7-example", "1.0.0");
+    globalMeter = {
+      requestDuration: meterInstance.createHistogram("requestDuration", {
+        description: "Duration of requests in milliseconds",
+      }),
+    }
+  }
+  return globalMeter;
 }
 
 
@@ -53,6 +73,7 @@ async function otelSpan(
   attributes: Record<string, string>,
   cb: () => Promise<unstable_InstrumentationHandlerResult>,
 ) {
+  const now = performance.now();
   return getTracer().startActiveSpan(
     label,
     { attributes },
@@ -64,6 +85,11 @@ async function otelSpan(
           code: SpanStatusCode.ERROR,
         });
       }
+      const duration = performance.now() - now;
+      getMeter().requestDuration.record(duration, {
+        ...attributes,
+        'labels.status': error ? 'error' : 'ok',  
+      });
       span.end();
     },
   );

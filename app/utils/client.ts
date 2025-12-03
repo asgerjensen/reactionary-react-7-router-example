@@ -14,6 +14,7 @@ import { type CommercetoolsConfiguration, withCommercetoolsCapabilities } from '
 import { type MedusaConfiguration, MedusaConfigurationSchema, withMedusaCapabilities } from '@reactionary/provider-medusa';
 import { type AlgoliaConfiguration, withAlgoliaCapabilities } from '@reactionary/provider-algolia';
 import type { Session, SessionData } from 'react-router';
+import { reactionaryCache } from '~/entry.server';
 
 
 export function createDefaultContext() {
@@ -95,44 +96,46 @@ export async function createReqContext(request: Request, session: Session<Sessio
 }
 
 export async function createClient(reqCtx: RequestContext) {
-
+  const enableAlgolia = process.env['ENABLE_ALGOLIA'] === 'true';
+  const enableCommercetools = process.env['ENABLE_COMMERCETOOLS'] === 'true';
+  const enableMedusa = process.env['ENABLE_MEDUSA'] === 'true';
 
   const client = new ClientBuilder(reqCtx)
     .withCapability(withAlgoliaCapabilities(
       getAlgoliaConfiguration(),
       {
-        productSearch: false
+        productSearch: enableAlgolia
       }
     ))
     .withCapability(withCommercetoolsCapabilities(
       getCommercetoolsConfiguration(),
       {
-        cart: true,
-        category: true,
-        checkout: true,
-        identity: true,
-        inventory: true,
-        order: true,
-        price: true,
-        product: true,
-        productSearch: true
+        cart: enableCommercetools,
+        category: enableCommercetools,
+        checkout: enableCommercetools,
+        identity: enableCommercetools,
+        inventory: enableCommercetools,
+        order: enableCommercetools,
+        price: enableCommercetools,
+        product: enableCommercetools,
+        productSearch: enableCommercetools && !enableAlgolia, // Disable if Algolia is enabled
       },
     ))
     .withCapability(withMedusaCapabilities(
       getMedusaConfiguration(),
       {
-        cart: false,
-        category: false,
-        checkout: false,
-        identity: false,
-        inventory: false,
-        order: false,
-        price: false,
-        product: false,
-        productSearch: false
+        cart: enableMedusa,
+        category: enableMedusa,
+        checkout: enableMedusa,
+        identity: enableMedusa,
+        inventory: enableMedusa,
+        order: enableMedusa,
+        price: enableMedusa,
+        product: enableMedusa,
+        productSearch: enableMedusa && !enableAlgolia, // Disable if Algolia is enabled
       },
     ))
-    .withCache(new NoOpCache())
+    .withCache(reactionaryCache)
     .build();
   return client;
 }
