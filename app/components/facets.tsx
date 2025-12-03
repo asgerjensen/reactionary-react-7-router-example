@@ -1,15 +1,28 @@
-import { Form } from "react-router";
+import { useSearchParams } from "react-router";
 import type { ProductSearchResult } from "@reactionary/core";
 import { useState } from "react";
 import { BiChevronDown, BiChevronUp } from "react-icons/bi";
 
 export interface FacetsProps {
   productPage: ProductSearchResult;
-  selectedFilters?: Record<string, string[]>;
 }
 
-export function Facets({ productPage, selectedFilters = {} }: FacetsProps) {
-  const [expandedFacets, setExpandedFacets] = useState<Set<string>>(new Set());
+export function Facets({ productPage }: FacetsProps) {
+  const [searchParams] = useSearchParams();
+  
+  // Auto-expand facets that have selected filters
+  const getInitialExpandedFacets = () => {
+    const expanded = new Set<string>();
+    productPage.facets?.forEach(facet => {
+      const selectedFilters = searchParams.getAll(`filter_${facet.identifier.key}`);
+      if (selectedFilters.length > 0) {
+        expanded.add(facet.identifier.key);
+      }
+    });
+    return expanded;
+  };
+  
+  const [expandedFacets, setExpandedFacets] = useState<Set<string>>(getInitialExpandedFacets);
 
   const toggleFacet = (facetKey: string) => {
     const newExpanded = new Set(expandedFacets);
@@ -20,6 +33,49 @@ export function Facets({ productPage, selectedFilters = {} }: FacetsProps) {
     }
     setExpandedFacets(newExpanded);
   };
+
+  // Get currently selected filters from URL
+  const getSelectedFilters = (facetKey: string): string[] => {
+    return searchParams.getAll(`filter_${facetKey}`);
+  };
+
+  // Handle filter change
+  const handleFilterChange = (facetKey: string, valueKey: string, isChecked: boolean) => {
+    const newParams = new URLSearchParams(searchParams);
+    const filterKey = `filter_${facetKey}`;
+    
+    if (isChecked) {
+      // Add the filter value
+      newParams.append(filterKey, valueKey);
+    } else {
+      // Remove this specific filter value
+      const allValues = newParams.getAll(filterKey);
+      newParams.delete(filterKey);
+      allValues.forEach(val => {
+        if (val !== valueKey) {
+          newParams.append(filterKey, val);
+        }
+      });
+    }
+    
+    // Reset to page 1 when filters change
+    newParams.set('page', '1');
+    
+    // Submit the form
+    const form = document.createElement('form');
+    form.method = 'get';
+    form.action = window.location.pathname;
+    newParams.forEach((value, key) => {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = key;
+      input.value = value;
+      form.appendChild(input);
+    });
+    document.body.appendChild(form);
+    form.submit();
+  };
+
 
   if (!productPage.facets || productPage.facets.length === 0) {
     return null;
@@ -54,32 +110,24 @@ export function Facets({ productPage, selectedFilters = {} }: FacetsProps) {
               <div className="p-4 space-y-2 max-h-64 overflow-y-auto">
                 {facet.values.map((value) => {
                   const valueKey = String(value.identifier.key);
-                  const isSelected = selectedFilters[facetKey]?.includes(valueKey) || false;
+                  const selectedValues = getSelectedFilters(facetKey);
+                  const isSelected = selectedValues.includes(valueKey);
                   
                   return (
-                    <Form method="get" key={valueKey}>
-                      <label className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
-                        <input
-                          type="checkbox"
-                          name={`filter_${facetKey}`}
-                          value={valueKey}
-                          defaultChecked={isSelected}
-                          className="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500"
-                          onChange={(e) => {
-                            const form = e.currentTarget.form;
-                            if (form) {
-                              form.requestSubmit();
-                            }
-                          }}
-                        />
-                        <span className="flex-1 text-sm text-gray-700">
-                          {String(value.name || valueKey)}
-                        </span>
-                        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                          {value.count}
-                        </span>
-                      </label>
-                    </Form>
+                    <label key={valueKey} className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={(e) => handleFilterChange(facetKey, valueKey, e.target.checked)}
+                        className="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500"
+                      />
+                      <span className="flex-1 text-sm text-gray-700">
+                        {String(value.name || valueKey)}
+                      </span>
+                      <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                        {value.count}
+                      </span>
+                    </label>
                   );
                 })}
               </div>

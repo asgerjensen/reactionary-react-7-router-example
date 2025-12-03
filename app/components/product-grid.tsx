@@ -9,7 +9,7 @@ export interface ProductGridProps {
 
 export function ProductGrid({ productPage, productPrices, cloudinaryCloudName }: ProductGridProps) {
   return (
-    <div className="grid grid-cols-4 gap-6 px-4 mt-8 md:px-12 lg:px-6 xl:px-4 xl:gap-6 2xl:px-24 2xl:gap-6 justify-items-center md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 overflow-hidden">
+    <div className="grid grid-cols-1 gap-6 px-4 mt-8 md:px-12 lg:px-6 xl:px-4 xl:gap-6 2xl:px-24 2xl:gap-6 justify-items-center md:grid-cols-2 lg:grid-cols-3 overflow-hidden">
       {productPage.items.map((product) => {
         const price = productPrices.find(
           price => price.identifier.variant.sku === product.variants[0].variant.sku

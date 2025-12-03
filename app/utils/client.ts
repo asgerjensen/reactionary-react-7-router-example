@@ -101,25 +101,11 @@ export async function createClient(reqCtx: RequestContext) {
     .withCapability(withAlgoliaCapabilities(
       getAlgoliaConfiguration(),
       {
-        productSearch: true
+        productSearch: false
       }
     ))
     .withCapability(withCommercetoolsCapabilities(
       getCommercetoolsConfiguration(),
-      {
-        cart: false,
-        category: false,
-        checkout: false,
-        identity: false,
-        inventory: false,
-        order: false,
-        price: false,
-        product: false,
-        productSearch: false
-      },
-    ))
-    .withCapability(withMedusaCapabilities(
-      getMedusaConfiguration(),
       {
         cart: true,
         category: true,
@@ -129,6 +115,20 @@ export async function createClient(reqCtx: RequestContext) {
         order: true,
         price: true,
         product: true,
+        productSearch: true
+      },
+    ))
+    .withCapability(withMedusaCapabilities(
+      getMedusaConfiguration(),
+      {
+        cart: false,
+        category: false,
+        checkout: false,
+        identity: false,
+        inventory: false,
+        order: false,
+        price: false,
+        product: false,
         productSearch: false
       },
     ))

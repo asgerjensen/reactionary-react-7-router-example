@@ -55,14 +55,12 @@ export default function Navbar({ cartCount, isLoggedIn, categories }: NavbarProp
         ))}
         
         {/* Categories Dropdown */}
-        <div 
-          className="relative"
-          onMouseEnter={() => setShowCategoryMenu(true)}
-          onMouseLeave={() => setShowCategoryMenu(false)}
-        >
-          <button className="navlink inline-flex items-center gap-1">
+        <div className="relative">
+          <button 
+            className="navlink inline-flex items-center gap-1"
+            onClick={() => setShowCategoryMenu(!showCategoryMenu)}
+          >
             Categories
-            <BiChevronDown className="text-sm" />
           </button>
           
           {showCategoryMenu && categories && categories.length > 0 && (
@@ -72,6 +70,7 @@ export default function Navbar({ cartCount, isLoggedIn, categories }: NavbarProp
                   key={category.identifier.key}
                   to={`/category/${category.slug}`}
                   className="block px-4 py-2 text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 transition-colors"
+                  onClick={() => setShowCategoryMenu(false)}
                 >
                   {category.name}
                 </Link>
